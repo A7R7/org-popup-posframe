@@ -112,6 +112,6 @@
   (if org-popup-posframe-mode
       (progn
         (advice-add 'org-mks :override
-                    '#org-popup-posframe--org-mks-advice))
-    (advice-remove 'org-mks :override
-                   '#org-popup-posframe--org-mks-advice)))
+                    #'org-popup-posframe--org-mks-advice))
+    (advice-remove 'org-mks
+                   #'org-popup-posframe--org-mks-advice)))
