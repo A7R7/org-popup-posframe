@@ -106,9 +106,9 @@
 
 (define-minor-mode org-popup-posframe-mode
   "Show org mode popup buffers in posframe"
-  nil
-  nil
-  nil
+  :group 'org-popup-posframe
+  :global t
+  :lighter nil
   (if org-popup-posframe-mode
       (progn
         (advice-add 'org-mks :override
