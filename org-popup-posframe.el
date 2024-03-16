@@ -93,9 +93,9 @@ When 0, no border is showed."
 
 ;;;; Functions
 
-(defun org-popup-posframe--org-mks-show-buffer ()
+(defun org-popup-posframe--org-mks-show-buffer (buffer)
   (when (posframe-workable-p)
-    (posframe-show (current-buffer)
+    (posframe-show buffer
 		   :position (point)
 		   :poshandler org-popup-posframe-org-mks-poshandler
 		   :font org-popup-posframe-font
@@ -107,9 +107,10 @@ When 0, no border is showed."
 		   :internal-border-color (face-attribute 'org-popup-posframe-border :background nil t)
 		   :override-parameters org-popup-posframe-parameters)))
 
-(defun org-popup-posframe--org-todo-show-buffer ()
+
+(defun org-popup-posframe--org-todo-show-buffer (buffer)
   (when (posframe-workable-p)
-    (posframe-show (get-buffer-create " *Org todo*")
+    (posframe-show buffer
 		   :position (point)
 		   :poshandler org-popup-posframe-org-todo-poshandler
 		   :font org-popup-posframe-font
@@ -123,38 +124,43 @@ When 0, no border is showed."
 
 
 (defun org-popup-posframe--org-mks-advice (func table title &optional prompt specials)
-  (let ((buffer (get-buffer-create "*Org Select*")))
-    (with-current-buffer buffer
-      (cl-letf (((symbol-function 'org-switch-to-buffer-other-window) #'get-buffer)
+  (let ((original-buffer (current-buffer))
+        (buffer (get-buffer-create "*Org Select*")))
+    (cl-letf (;; set buffer to "*Org Select*"
+                ((symbol-function 'org-switch-to-buffer-other-window) #'set-buffer)
                 ((symbol-function 'org-fit-window-to-buffer)
-                 #'org-popup-posframe--org-mks-show-buffer))
-        (funcall func table title prompt specials)))))
+                 (lambda ()
+                   ;; set buffer back
+                   (set-buffer original-buffer)
+                   ;; posframe show
+                   (org-popup-posframe--org-mks-show-buffer buffer))))
+        (funcall func table title prompt specials))))
+
 
 (defun org-popup-posframe--org-todo-advice (func &optional current-todo-keyword)
   ;; If using (with-current-buffer buffer ... ) or (set-buffer buffer)
   ;; before calling org-fast-todo-selection
   ;; inside org-fast-todo-selection, (apply max ...) will error
-  (declare (indent 1) (debug t))
-  (save-current-buffer
-    (fset 'original-set-window-buffer (symbol-function 'set-window-buffer))
-    (let ((buffer (get-buffer-create " *Org todo*"))
-          (result
-           (cl-letf* (((symbol-function 'delete-other-windows) (lambda () nil))
-                      ((symbol-function 'split-window-below) (lambda () nil))
-                      ((symbol-function 'set-window-buffer) (lambda (a b) nil))
-                      ;; set buffer to " *Org todo*"
-                      ((symbol-function 'org-switch-to-buffer-other-window) #'set-buffer)
-                      ;; avoid set-window-buffer redefinition inside posframe-show
-                      ((symbol-function 'org-fit-window-to-buffer)
-                       (lambda () (cl-letf (((symbol-function 'set-window-buffer)
-                                             #'original-set-window-buffer))
-                                    (org-popup-posframe--org-todo-show-buffer)))))
-                    (funcall func current-todo-keyword))))
-      (kill-buffer buffer)
-      result)))
-
-
-
+  (let ((original-buffer (current-buffer))
+        (buffer (get-buffer-create " *Org todo*")))
+    (unwind-protect
+        (fset 'original-set-window-buffer (symbol-function 'set-window-buffer))
+        (cl-letf* (((symbol-function 'delete-other-windows) (lambda () nil))
+                   ((symbol-function 'split-window-below) (lambda () nil))
+                   ((symbol-function 'set-window-buffer) (lambda (a b) nil))
+                   ;; set buffer to " *Org todo*"
+                   ((symbol-function 'org-switch-to-buffer-other-window) #'set-buffer)
+                   ((symbol-function 'org-fit-window-to-buffer)
+                    (lambda ()
+                      ;; set buffer back
+                      (set-buffer original-buffer)
+                      (cl-letf (((symbol-function 'set-window-buffer)
+                                 ;; avoid set-window-buffer redefinition
+                                 #'original-set-window-buffer))
+                        ;; posframe show
+                        (org-popup-posframe--org-todo-show-buffer buffer)))))
+          (funcall func current-todo-keyword))
+      (when buffer (kill-buffer buffer)))))
 
 
 ;;;###autoload
