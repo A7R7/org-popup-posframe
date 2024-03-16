@@ -1,4 +1,4 @@
-;;; org-popup-posframe.el --- Display org mode popup buffers in posframe -*- lexical-binding: t; -*-
+;;; org-popup-posframe.el --- Show org mode popup buffers in posframe -*- lexical-binding: t; -*-
 
 ;;; Commentary:
 
@@ -29,81 +29,135 @@
 ;;;; Requirements
 
 (require 'posframe)
+(require 'org)
 
-;;;; Faces
+;;;; Customs & Faces
 
-;;;; Customization
+(defgroup org-popup-posframe nil
+  "Show org mode popup buffers in posframe."
+  :group 'org-popup-posframe
+  :prefix "org-popup-posframe")
 
-;;;; Constants
+(defcustom org-popup-posframe-font nil
+  "The font used by org-popup-posframe."
+  :group 'org-popup-posframe
+  :type 'string)
+
+(defcustom org-popup-posframe-poshandler #'posframe-poshandler-window-bottom-right-corner
+  "The poshandler of org-popup-posframe."
+  :group 'org-popup-posframe
+  :type 'function)
+
+(defcustom org-popup-posframe-org-mks-poshandler org-popup-posframe-poshandler
+  "The poshandler of org-popup-posframe."
+  :group 'org-popup-posframe
+  :type 'function)
+
+(defcustom org-popup-posframe-org-todo-poshandler org-popup-posframe-poshandler
+  "The poshandler of org-popup-posframe."
+  :group 'org-popup-posframe
+  :type 'function)
+
+(defcustom org-popup-posframe-min-width 0
+  "The width of org-popup-min-posframe."
+  :group 'org-popup-posframe
+  :type 'number)
+
+(defcustom org-popup-posframe-min-height 0
+  "The height of org-popup-min-posframe."
+  :group 'org-popup-posframe
+  :type 'number)
+
+(defcustom org-popup-posframe-border-width 1
+  "The border width used by org-popup-posframe.
+When 0, no border is showed."
+  :group 'org-popup-posframe
+  :type 'number)
+
+(defcustom org-popup-posframe-parameters nil
+  "The frame parameters used by org-popup-posframe."
+  :group 'org-popup-posframe
+  :type 'string)
+
+(defface org-popup-posframe
+  '((t (:inherit default)))
+  "Face used by the org-popup-posframe."
+  :group 'org-popup-posframe)
+
+(defface org-popup-posframe-border
+  '((t (:inherit default :background "gray50")))
+  "Face used by the org-popup-posframe's border."
+  :group 'org-popup-posframe)
+
+
 
 ;;;; Functions
 
-(defun org-popup-posframe--org-mks-advice (table title &optional prompt specials)
-  (let ((inhibit-quit t)
-	(buffer (get-buffer-create "*Org Select*"))
-	(prompt (or prompt "Select: "))
-	case-fold-search
-	current)
-    (unwind-protect
-	(catch 'exit
-	  (while t
-	    (let ((des-keys nil)
-		  (allowed-keys '("\C-g"))
-		  (tab-alternatives '("\s" "\t" "\r"))
-		  (cursor-type nil))
-	      (with-current-buffer buffer
-		(erase-buffer)
-		(insert title "\n\n")
-		;; Populate allowed keys and descriptions keys
-		;; available with CURRENT selector.
-		(let ((re (format "\\`%s\\(.\\)\\'"
-				  (if current (regexp-quote current) "")))
-		      (prefix (if current (concat current " ") "")))
-		  (dolist (entry table)
-		    (pcase entry
-		      ;; Description.
-		      (`(,(and key (pred (string-match re))) ,desc)
-		       (let ((k (match-string 1 key)))
-			 (push k des-keys)
-			 ;; Keys ending in tab, space or RET are equivalent.
-			 (if (member k tab-alternatives)
-			     (push "\t" allowed-keys)
-			   (push k allowed-keys))
-			 (insert prefix "[" k "]" "..." "  " desc "..." "\n")))
-		      ;; Usable entry.
-		      (`(,(and key (pred (string-match re))) ,desc . ,_)
-		       (let ((k (match-string 1 key)))
-			 (insert prefix "[" k "]" "     " desc "\n")
-			 (push k allowed-keys)))
-		      (_ nil))))
-		;; Insert special entries, if any.
-		(when specials
-		  (insert "----------------------------------------------------\n")
-		  (pcase-dolist (`(,key ,description) specials)
-		    (insert (format "[%s]     %s\n" key description))
-		    (push key allowed-keys))))
-	      ;; Display UI and let user select an entry or
-	      ;; a sub-level prefix.
-	      (posframe-show buffer)
-	      (let ((pressed (org--mks-read-key
-			      allowed-keys prompt
-			      (not (pos-visible-in-window-p (1- (point-max)))))))
-		(setq current (concat current pressed))
-		(cond
-		 ((equal pressed "\C-g") (user-error "Abort"))
-		 ;; Selection is a prefix: open a new menu.
-		 ((member pressed des-keys))
-		 ;; Selection matches an association: return it.
-		 ((let ((entry (assoc current table)))
-		    (and entry (throw 'exit entry))))
-		 ;; Selection matches a special entry: return the
-		 ;; selection prefix.
-		 ((assoc current specials) (throw 'exit current))
-		 (t (error "No entry available")))))))
-      (when buffer (kill-buffer buffer)))))
+(defun org-popup-posframe--org-mks-show-buffer ()
+  (when (posframe-workable-p)
+    (posframe-show (current-buffer)
+		   :position (point)
+		   :poshandler org-popup-posframe-org-mks-poshandler
+		   :font org-popup-posframe-font
+		   :background-color (face-attribute 'org-popup-posframe :background nil t)
+		   :foreground-color (face-attribute 'org-popup-posframe :foreground nil t)
+		   ;; :min-width org-popup-posframe-min-width
+		   ;; :min-height org-popup-posframe-min-height
+		   :internal-border-width org-popup-posframe-border-width
+		   :internal-border-color (face-attribute 'org-popup-posframe-border :background nil t)
+		   :override-parameters org-popup-posframe-parameters)))
+
+(defun org-popup-posframe--org-todo-show-buffer ()
+  (when (posframe-workable-p)
+    (posframe-show (get-buffer-create " *Org todo*")
+		   :position (point)
+		   :poshandler org-popup-posframe-org-todo-poshandler
+		   :font org-popup-posframe-font
+		   :background-color (face-attribute 'org-popup-posframe :background nil t)
+		   :foreground-color (face-attribute 'org-popup-posframe :foreground nil t)
+		   ;; :min-width org-popup-posframe-min-width
+		   ;; :min-height org-popup-posframe-min-height
+		   :internal-border-width org-popup-posframe-border-width
+		   :internal-border-color (face-attribute 'org-popup-posframe-border :background nil t)
+		   :override-parameters org-popup-posframe-parameters)))
+
+
+(defun org-popup-posframe--org-mks-advice (func table title &optional prompt specials)
+  (let ((buffer (get-buffer-create "*Org Select*")))
+    (with-current-buffer buffer
+      (cl-letf (((symbol-function 'org-switch-to-buffer-other-window) #'get-buffer)
+                ((symbol-function 'org-fit-window-to-buffer)
+                 #'org-popup-posframe--org-mks-show-buffer))
+        (funcall func table title prompt specials)))))
+
+(defun org-popup-posframe--org-todo-advice (func &optional current-todo-keyword)
+  ;; If using (with-current-buffer buffer ... ) or (set-buffer buffer)
+  ;; before calling org-fast-todo-selection
+  ;; inside org-fast-todo-selection, (apply max ...) will error
+  (declare (indent 1) (debug t))
+  (save-current-buffer
+    (fset 'original-set-window-buffer (symbol-function 'set-window-buffer))
+    (let ((buffer (get-buffer-create " *Org todo*"))
+          (result
+           (cl-letf* (((symbol-function 'delete-other-windows) (lambda () nil))
+                      ((symbol-function 'split-window-below) (lambda () nil))
+                      ((symbol-function 'set-window-buffer) (lambda (a b) nil))
+                      ;; set buffer to " *Org todo*"
+                      ((symbol-function 'org-switch-to-buffer-other-window) #'set-buffer)
+                      ;; avoid set-window-buffer redefinition inside posframe-show
+                      ((symbol-function 'org-fit-window-to-buffer)
+                       (lambda () (cl-letf (((symbol-function 'set-window-buffer)
+                                             #'original-set-window-buffer))
+                                    (org-popup-posframe--org-todo-show-buffer)))))
+                    (funcall func current-todo-keyword))))
+      (kill-buffer buffer)
+      result)))
 
 
 
+
+
+;;;###autoload
 (define-minor-mode org-popup-posframe-mode
   "Show org mode popup buffers in posframe"
   :group 'org-popup-posframe
@@ -111,7 +165,19 @@
   :lighter nil
   (if org-popup-posframe-mode
       (progn
-        (advice-add 'org-mks :override
-                    #'org-popup-posframe--org-mks-advice))
+        (advice-add 'org-mks :around
+                    #'org-popup-posframe--org-mks-advice)
+        (advice-add 'org-fast-todo-selection :around
+                    #'org-popup-posframe--org-todo-advice))
     (advice-remove 'org-mks
-                   #'org-popup-posframe--org-mks-advice)))
+                   #'org-popup-posframe--org-mks-advice)
+    (advice-remove 'org-fast-todo-selection
+                   #'org-popup-posframe--org-todo-advice)))
+
+(provide 'org-popup-posframe)
+
+;; Local Variables:
+;; coding: utf-8-unix
+;; End:
+
+;;; org-popup-posframe.el ends here
