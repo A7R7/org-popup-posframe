@@ -38,39 +38,74 @@
   :group 'org-popup-posframe
   :prefix "org-popup-posframe")
 
+(defcustom org-popup-posframe-org-attach t
+  "Show org-attach buffer in posframe."
+  :group 'org-popup-posframe
+  :type 'boolean)
+
+(defcustom org-popup-posframe-org-capture t
+  "Show org-capture buffer in posframe."
+  :group 'org-popup-posframe
+  :type 'boolean)
+
+(defcustom org-popup-posframe-org-export-dispatch t
+  "Show org-export-dispatch buffer in posframe."
+  :group 'org-popup-posframe
+  :type 'boolean)
+
+(defcustom org-popup-posframe-org-insert-link t
+  "Show org-insert-link buffer in posframe."
+  :group 'org-popup-posframe
+  :type 'boolean)
+
+(defcustom org-popup-posframe-org-insert-structure-template t
+  "Show org-insert-structure-template buffer in posframe."
+  :group 'org-popup-posframe
+  :type 'boolean)
+
+(defcustom org-popup-posframe-org-todo t
+  "Show org-todo buffer in posframe."
+  :group 'org-popup-posframe
+  :type 'boolean)
+
+
 (defcustom org-popup-posframe-font nil
   "The font used by org-popup-posframe."
   :group 'org-popup-posframe
   :type 'string)
 
-(defcustom org-popup-posframe-org-attach-poshandler #'posframe-poshandler-window-bottom-right-corner
+(defcustom org-popup-posframe-org-attach-poshandler
+  #'posframe-poshandler-window-bottom-right-corner
   "The posframe poshandler of org-attach."
   :group 'org-popup-posframe
   :type 'function)
 
-(defcustom org-popup-posframe-org-export-dispatch-poshandler #'posframe-poshandler-window-bottom-right-corner
+(defcustom org-popup-posframe-org-export-dispatch-poshandler
+  #'posframe-poshandler-window-bottom-right-corner
   "The posframe poshandler of org-export-dispatch."
   :group 'org-popup-posframe
   :type 'function)
 
-(defvar org-popup-posframe--org-mks-poshandler nil)
-
-(defcustom org-popup-posframe-org-capture-poshandler #'posframe-poshandler-window-bottom-right-corner
+(defcustom org-popup-posframe-org-capture-poshandler
+  #'posframe-poshandler-window-bottom-right-corner
   "The posframe poshandler of org-insert."
   :group 'org-popup-posframe
   :type 'function)
 
-(defcustom org-popup-posframe-org-insert-link-poshandler #'posframe-poshandler-window-bottom-right-corner
+(defcustom org-popup-posframe-org-insert-link-poshandler
+  #'posframe-poshandler-window-bottom-right-corner
   "The posframe poshandler of org-insert-structure-template."
   :group 'org-popup-posframe
   :type 'function)
 
-(defcustom org-popup-posframe-org-insert-structure-template-poshandler #'posframe-poshandler-point-1
+(defcustom org-popup-posframe-org-insert-structure-template-poshandler
+  #'posframe-poshandler-point-1
   "The posframe poshandler of org-insert-structure-template."
   :group 'org-popup-posframe
   :type 'function)
 
-(defcustom org-popup-posframe-org-todo-poshandler #'posframe-poshandler-point-1
+(defcustom org-popup-posframe-org-todo-poshandler
+  #'posframe-poshandler-point-1
   "The posframe poshandler of org-todo."
   :group 'org-popup-posframe
   :type 'function)
@@ -145,8 +180,7 @@ When 0, no border is showed."
 
 
 (defun org-popup-posframe--org-export--dispatch-ui-advice (func options first-key expertp)
-  (let ((original-buffer (current-buffer))
-        (buffer (get-buffer-create "*Org Export Dispatcher*")))
+  (let ((buffer (get-buffer-create "*Org Export Dispatcher*")))
     (cl-letf (((symbol-function 'org-fit-window-to-buffer)
                (lambda ()
                  ;; posframe show
@@ -156,6 +190,7 @@ When 0, no border is showed."
       (funcall func options first-key expertp))))
 
 
+(defvar org-popup-posframe--org-mks-poshandler nil)
 (defun org-popup-posframe--org-mks-advice (func table title &optional prompt specials)
   (let ((original-buffer (current-buffer))
         (buffer (get-buffer-create "*Org Select*")))
@@ -220,8 +255,7 @@ When 0, no border is showed."
 
 (defun org-popup-posframe--org-insert-link-advice
     (func &optional COMPLETE-FILE LINK-LOCATION DESCRIPTION)
-  (let ((original-buffer (current-buffer))
-        (buffer (get-buffer-create "*Org Links*")))
+  (let ((buffer (get-buffer-create "*Org Links*")))
     (cl-letf (;; set buffer to "*Org Select*"
               ((symbol-function 'org-switch-to-buffer-other-window)
                (lambda (a) (ignore a)))
@@ -242,24 +276,30 @@ When 0, no border is showed."
   :lighter nil
   (if org-popup-posframe-mode
       (progn
-        (advice-add 'org-attach :around
-                    #'org-popup-posframe--org-attach-advice)
-        (advice-add 'org-capture :around
-                    #'org-popup-posframe--org-capture-advice)
-        (advice-add 'org-export--dispatch-ui :around
-                    #'org-popup-posframe--org-export--dispatch-ui-advice)
-        (advice-add 'org--insert-structure-template-mks :around
-                    #'org-popup-posframe--org-insert-structure-template-mks-advice)
-        (advice-add 'org-fast-todo-selection :around
-                    #'org-popup-posframe--org-fast-todo-selection-advice)
-        (advice-add 'org-insert-link :around
-                    #'org-popup-posframe--org-insert-link-advice))
+        (if org-popup-posframe-org-attach
+            (advice-add 'org-attach :around
+                        #'org-popup-posframe--org-attach-advice))
+        (if org-popup-posframe-org-capture
+            (advice-add 'org-capture :around
+                        #'org-popup-posframe--org-capture-advice))
+        (if org-popup-posframe-org-export-dispatch
+            (advice-add 'org-export--dispatch-ui :around
+                        #'org-popup-posframe--org-export--dispatch-ui-advice))
+        (if org-popup-posframe-org-insert-structure-template
+            (advice-add 'org--insert-structure-template-mks :around
+                        #'org-popup-posframe--org-insert-structure-template-mks-advice))
+        (if org-popup-posframe-org-todo
+            (advice-add 'org-fast-todo-selection :around
+                        #'org-popup-posframe--org-fast-todo-selection-advice))
+        (if org-popup-posframe-org-insert-link
+            (advice-add 'org-insert-link :around
+                        #'org-popup-posframe--org-insert-link-advice)))
     (advice-remove 'org-attach
                    #'org-popup-posframe--org-attach-advice)
     (advice-remove 'org-capture
                    #'org-popup-posframe--org-capture-advice)
     (advice-remove 'org-export--dispatch-ui
-                   org-popup-posframe--org-export--dispatch-ui-advice)
+                   #'org-popup-posframe--org-export--dispatch-ui-advice)
     (advice-remove 'org-insert-structure-template
                    #'org-popup-posframe--org-insert-structure-template-mks-advice)
     (advice-remove 'org-fast-todo-selection
