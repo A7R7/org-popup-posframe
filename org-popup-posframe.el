@@ -211,9 +211,10 @@ When 0, no border is showed."
         org-popup-posframe-org-capture-poshandler)
   (advice-add 'org-mks :around
               #'org-popup-posframe--org-mks-advice)
-  (funcall func goto keys)
-  (advice-remove 'org-mks
-                 #'org-popup-posframe--org-mks-advice))
+  (unwind-protect
+      (funcall func goto keys)
+    (advice-remove 'org-mks
+                 #'org-popup-posframe--org-mks-advice)))
 
 
 (defun org-popup-posframe--org-insert-structure-template-mks-advice (func)
@@ -221,9 +222,10 @@ When 0, no border is showed."
         org-popup-posframe-org-insert-structure-template-poshandler)
   (advice-add 'org-mks :around
               #'org-popup-posframe--org-mks-advice)
-  (funcall func)
-  (advice-remove 'org-mks
-                 #'org-popup-posframe--org-mks-advice))
+  (unwind-protect
+      (funcall func)
+    (advice-remove 'org-mks
+                   #'org-popup-posframe--org-mks-advice)))
 
 
 (defun org-popup-posframe--org-fast-todo-selection-advice (func &optional current-todo-keyword)
