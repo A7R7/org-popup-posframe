@@ -43,11 +43,6 @@
   :group 'org-popup-posframe
   :type 'string)
 
-(defcustom org-popup-posframe-poshandler #'posframe-poshandler-window-bottom-right-corner
-  "The poshandler of org-popup-posframe."
-  :group 'org-popup-posframe
-  :type 'function)
-
 (defvar org-popup-posframe--org-mks-poshandler nil)
 
 (defcustom org-popup-posframe-org-capture-poshandler #'posframe-poshandler-window-bottom-right-corner
@@ -105,50 +100,19 @@ When 0, no border is showed."
 
 ;;;; Functions
 
-(defun org-popup-posframe--org-mks-show-buffer (buffer)
+(defun org-popup-posframe--show-buffer (buffer poshandler)
   (when (posframe-workable-p)
     (posframe-show buffer
 		   :position (point)
-		   :poshandler org-popup-posframe--org-mks-poshandler
+		   :poshandler poshandler
 		   :font org-popup-posframe-font
 		   :background-color (face-attribute 'org-popup-posframe :background nil t)
 		   :foreground-color (face-attribute 'org-popup-posframe :foreground nil t)
-		   ;; :min-width org-popup-posframe-min-width
-		   ;; :min-height org-popup-posframe-min-height
+		   :min-width org-popup-posframe-min-width
+		   :min-height org-popup-posframe-min-height
 		   :internal-border-width org-popup-posframe-border-width
 		   :internal-border-color (face-attribute 'org-popup-posframe-border :background nil t)
 		   :override-parameters org-popup-posframe-parameters)))
-
-
-(defun org-popup-posframe--org-todo-show-buffer (buffer)
-  (when (posframe-workable-p)
-    (posframe-show buffer
-		   :position (point)
-		   :poshandler org-popup-posframe-org-todo-poshandler
-		   :font org-popup-posframe-font
-		   :background-color (face-attribute 'org-popup-posframe :background nil t)
-		   :foreground-color (face-attribute 'org-popup-posframe :foreground nil t)
-		   ;; :min-width org-popup-posframe-min-width
-		   ;; :min-height org-popup-posframe-min-height
-		   :internal-border-width org-popup-posframe-border-width
-		   :internal-border-color (face-attribute 'org-popup-posframe-border :background nil t)
-		   :override-parameters org-popup-posframe-parameters)))
-
-
-(defun org-popup-posframe--org-insert-link-show-buffer (buffer)
-  (when (posframe-workable-p)
-    (posframe-show buffer
-		   :position (point)
-		   :poshandler org-popup-posframe-org-insert-link-poshandler
-		   :font org-popup-posframe-font
-		   :background-color (face-attribute 'org-popup-posframe :background nil t)
-		   :foreground-color (face-attribute 'org-popup-posframe :foreground nil t)
-		   ;; :min-width org-popup-posframe-min-width
-		   ;; :min-height org-popup-posframe-min-height
-		   :internal-border-width org-popup-posframe-border-width
-		   :internal-border-color (face-attribute 'org-popup-posframe-border :background nil t)
-		   :override-parameters org-popup-posframe-parameters)))
-
 
 
 (defun org-popup-posframe--org-mks-advice (func table title &optional prompt specials)
@@ -161,18 +125,23 @@ When 0, no border is showed."
                    ;; set buffer back
                    (set-buffer original-buffer)
                    ;; posframe show
-                   (org-popup-posframe--org-mks-show-buffer buffer))))
+                   (org-popup-posframe--show-buffer
+                    buffer
+                    org-popup-posframe--org-mks-poshandler))))
         (funcall func table title prompt specials))))
+
 
 (defun org-popup-posframe--org-capture-advice (&rest r)
   (ignore r)
   (setq org-popup-posframe--org-mks-poshandler
         org-popup-posframe-org-capture-poshandler))
 
+
 (defun org-popup-posframe--org-insert-structure-template-mks-advice (&rest r)
   (ignore r)
   (setq org-popup-posframe--org-mks-poshandler
         org-popup-posframe-org-insert-structure-template-poshandler))
+
 
 (defun org-popup-posframe--org-fast-todo-selection-advice (func &optional current-todo-keyword)
   ;; If using (with-current-buffer buffer ... ) or (set-buffer buffer)
@@ -195,9 +164,12 @@ When 0, no border is showed."
                                  ;; avoid set-window-buffer redefinition
                                  #'original-set-window-buffer))
                         ;; posframe show
-                        (org-popup-posframe--org-todo-show-buffer buffer)))))
+                        (org-popup-posframe--show-buffer
+                         buffer
+                         org-popup-posframe-org-todo-poshandler)))))
           (funcall func current-todo-keyword))
       (when buffer (kill-buffer buffer)))))
+
 
 (defun org-popup-posframe--org-insert-link-advice
     (func &optional COMPLETE-FILE LINK-LOCATION DESCRIPTION)
@@ -208,7 +180,9 @@ When 0, no border is showed."
                (lambda (a) (ignore a)))
               ((symbol-function 'org-format-prompt)
                (lambda (PROMPT DEFAULT &rest FORMAT-ARGS)
-                 (org-popup-posframe--org-insert-link-show-buffer buffer)
+                 (org-popup-posframe--show-buffer
+                  buffer
+                  org-popup-posframe-org-insert-link-poshandler)
                  (format-prompt PROMPT DEFAULT FORMAT-ARGS))))
       (funcall func COMPLETE-FILE LINK-LOCATION DESCRIPTION))))
 
