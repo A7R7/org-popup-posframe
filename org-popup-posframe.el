@@ -172,22 +172,28 @@ When 0, no border is showed."
       (funcall func table title prompt specials))))
 
 
-(defun org-popup-posframe--org-capture-advice (&rest r)
-  (ignore r)
+(defun org-popup-posframe--org-capture-advice (func &optional goto keys)
   (setq org-popup-posframe--org-mks-poshandler
-        org-popup-posframe-org-capture-poshandler))
+        org-popup-posframe-org-capture-poshandler)
+  (advice-add 'org-mks :around
+              #'org-popup-posframe--org-mks-advice)
+  (funcall func goto keys)
+  (advice-remove 'org-mks
+                 #'org-popup-posframe--org-mks-advice))
 
 
-(defun org-popup-posframe--org-insert-structure-template-mks-advice (&rest r)
-  (ignore r)
+(defun org-popup-posframe--org-insert-structure-template-mks-advice (func type)
   (setq org-popup-posframe--org-mks-poshandler
-        org-popup-posframe-org-insert-structure-template-poshandler))
+        org-popup-posframe-org-insert-structure-template-poshandler)
+  (advice-add 'org-mks :around
+              #'org-popup-posframe--org-mks-advice)
+  (funcall func type)
+  (advice-remove 'org-mks
+                 #'org-popup-posframe--org-mks-advice))
 
 
 (defun org-popup-posframe--org-fast-todo-selection-advice (func &optional current-todo-keyword)
-  ;; If using (with-current-buffer buffer ... ) or (set-buffer buffer)
-  ;; before calling org-fast-todo-selection
-  ;; inside org-fast-todo-selection, (apply max ...) will error
+  ;; TODO: simplier implementation
   (let ((original-buffer (current-buffer))
         (buffer (get-buffer-create " *Org todo*")))
     (fset 'original-set-window-buffer (symbol-function 'set-window-buffer))
@@ -238,13 +244,11 @@ When 0, no border is showed."
       (progn
         (advice-add 'org-attach :around
                     #'org-popup-posframe--org-attach-advice)
-        (advice-add 'org-mks :around
-                    #'org-popup-posframe--org-mks-advice)
-        (advice-add 'org-capture :before
+        (advice-add 'org-capture :around
                     #'org-popup-posframe--org-capture-advice)
         (advice-add 'org-export--dispatch-ui :around
                     #'org-popup-posframe--org-export--dispatch-ui-advice)
-        (advice-add 'org--insert-structure-template-mks :before
+        (advice-add 'org--insert-structure-template-mks :around
                     #'org-popup-posframe--org-insert-structure-template-mks-advice)
         (advice-add 'org-fast-todo-selection :around
                     #'org-popup-posframe--org-fast-todo-selection-advice)
@@ -252,8 +256,6 @@ When 0, no border is showed."
                     #'org-popup-posframe--org-insert-link-advice))
     (advice-remove 'org-attach
                    #'org-popup-posframe--org-attach-advice)
-    (advice-remove 'org-mks
-                   #'org-popup-posframe--org-mks-advice)
     (advice-remove 'org-capture
                    #'org-popup-posframe--org-capture-advice)
     (advice-remove 'org-export--dispatch-ui
