@@ -22,7 +22,6 @@
 
 ;;;; Installation and usage
 
-;;;; Tips
 
 ;;; Code:
 
@@ -217,12 +216,12 @@ When 0, no border is showed."
                  #'org-popup-posframe--org-mks-advice))
 
 
-(defun org-popup-posframe--org-insert-structure-template-mks-advice (func type)
+(defun org-popup-posframe--org-insert-structure-template-mks-advice (func)
   (setq org-popup-posframe--org-mks-poshandler
         org-popup-posframe-org-insert-structure-template-poshandler)
   (advice-add 'org-mks :around
               #'org-popup-posframe--org-mks-advice)
-  (funcall func type)
+  (funcall func)
   (advice-remove 'org-mks
                  #'org-popup-posframe--org-mks-advice))
 
