@@ -3,6 +3,14 @@
 ;;; Commentary:
 
 ;; Display org mode popup buffers in posframe
+;; Supported popup buffers:
+;; - org-attach
+;; - org-capture
+;; - org-export-dispatch
+;; - org-insert-link
+;; - org-insert-structure-template
+;; - org-todo
+
 
 ;;; License:
 
@@ -174,7 +182,7 @@ When 0, no border is showed."
                      (org-popup-posframe--show-buffer
                       buffer
                       org-popup-posframe-org-attach-poshandler))))
-          (funcall func))
+          (funcall-interactively func))
       (kill-buffer buffer))))
 
 
@@ -186,7 +194,7 @@ When 0, no border is showed."
                  (org-popup-posframe--show-buffer
                   buffer
                   org-popup-posframe-org-export-dispatch-poshandler))))
-      (funcall func options first-key expertp))))
+      (funcall-interactively func options first-key expertp))))
 
 
 (defvar org-popup-posframe--org-mks-poshandler nil)
@@ -203,7 +211,7 @@ When 0, no border is showed."
                  (org-popup-posframe--show-buffer
                   buffer
                   org-popup-posframe--org-mks-poshandler))))
-      (funcall func table title prompt specials))))
+      (funcall-interactively func table title prompt specials))))
 
 
 (defun org-popup-posframe--org-capture-advice (func &optional goto keys)
@@ -212,7 +220,7 @@ When 0, no border is showed."
   (advice-add 'org-mks :around
               #'org-popup-posframe--org-mks-advice)
   (unwind-protect
-      (funcall func goto keys)
+      (funcall-interactively func goto keys)
     (advice-remove 'org-mks
                  #'org-popup-posframe--org-mks-advice)))
 
@@ -223,7 +231,7 @@ When 0, no border is showed."
   (advice-add 'org-mks :around
               #'org-popup-posframe--org-mks-advice)
   (unwind-protect
-      (funcall func)
+      (funcall-interactively func)
     (advice-remove 'org-mks
                    #'org-popup-posframe--org-mks-advice)))
 
@@ -250,7 +258,7 @@ When 0, no border is showed."
                         (org-popup-posframe--show-buffer
                          buffer
                          org-popup-posframe-org-todo-poshandler)))))
-          (funcall func current-todo-keyword))
+          (funcall-interactively func current-todo-keyword))
       (when buffer (kill-buffer buffer)))))
 
 
@@ -301,7 +309,7 @@ When 0, no border is showed."
                    #'org-popup-posframe--org-capture-advice)
     (advice-remove 'org-export--dispatch-ui
                    #'org-popup-posframe--org-export--dispatch-ui-advice)
-    (advice-remove 'org-insert-structure-template
+    (advice-remove 'org--insert-structure-template-mks
                    #'org-popup-posframe--org-insert-structure-template-mks-advice)
     (advice-remove 'org-fast-todo-selection
                    #'org-popup-posframe--org-fast-todo-selection-advice)
