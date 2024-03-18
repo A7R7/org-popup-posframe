@@ -129,19 +129,19 @@ When 0, no border is showed."
   (let ((original-buffer (current-buffer))
         (buffer (get-buffer-create "*Org Attach*")))
     (unwind-protect
-     (cl-letf (;; set buffer to "*Org Attach*"
-               ((symbol-function 'org-switch-to-buffer-other-window) #'set-buffer)
-               ((symbol-function 'org-fit-window-to-buffer)
-                (lambda (a)
-                  (ignore a)
-                  ;; set buffer back
-                  (set-buffer original-buffer)
-                  ;; posframe show
-                  (org-popup-posframe--show-buffer
-                   buffer
-                   org-popup-posframe-org-attach-poshandler))))
-       (funcall func))
-     (kill-buffer buffer))))
+        (cl-letf (;; set buffer to "*Org Attach*"
+                  ((symbol-function 'org-switch-to-buffer-other-window) #'set-buffer)
+                  ((symbol-function 'org-fit-window-to-buffer)
+                   (lambda (a)
+                     (ignore a)
+                     ;; set buffer back
+                     (set-buffer original-buffer)
+                     ;; posframe show
+                     (org-popup-posframe--show-buffer
+                      buffer
+                      org-popup-posframe-org-attach-poshandler))))
+          (funcall func))
+      (kill-buffer buffer))))
 
 
 (defun org-popup-posframe--org-export--dispatch-ui-advice (func options first-key expertp)
@@ -160,16 +160,16 @@ When 0, no border is showed."
   (let ((original-buffer (current-buffer))
         (buffer (get-buffer-create "*Org Select*")))
     (cl-letf (;; set buffer to "*Org Select*"
-                ((symbol-function 'org-switch-to-buffer-other-window) #'set-buffer)
-                ((symbol-function 'org-fit-window-to-buffer)
-                 (lambda ()
-                   ;; set buffer back
-                   (set-buffer original-buffer)
-                   ;; posframe show
-                   (org-popup-posframe--show-buffer
-                    buffer
-                    org-popup-posframe--org-mks-poshandler))))
-        (funcall func table title prompt specials))))
+              ((symbol-function 'org-switch-to-buffer-other-window) #'set-buffer)
+              ((symbol-function 'org-fit-window-to-buffer)
+               (lambda ()
+                 ;; set buffer back
+                 (set-buffer original-buffer)
+                 ;; posframe show
+                 (org-popup-posframe--show-buffer
+                  buffer
+                  org-popup-posframe--org-mks-poshandler))))
+      (funcall func table title prompt specials))))
 
 
 (defun org-popup-posframe--org-capture-advice (&rest r)
@@ -251,7 +251,7 @@ When 0, no border is showed."
         (advice-add 'org-insert-link :around
                     #'org-popup-posframe--org-insert-link-advice))
     (advice-remove 'org-attach
-                    #'org-popup-posframe--org-attach-advice)
+                   #'org-popup-posframe--org-attach-advice)
     (advice-remove 'org-mks
                    #'org-popup-posframe--org-mks-advice)
     (advice-remove 'org-capture
