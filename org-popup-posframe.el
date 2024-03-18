@@ -48,13 +48,20 @@
   :group 'org-popup-posframe
   :type 'function)
 
-(defcustom org-popup-posframe-org-mks-poshandler org-popup-posframe-poshandler
-  "The poshandler of org-popup-posframe."
+(defvar org-popup-posframe--org-mks-poshandler nil)
+
+(defcustom org-popup-posframe-org-capture-poshandler #'posframe-poshandler-window-bottom-right-corner
+  "The posframe poshandler of org-insert."
   :group 'org-popup-posframe
   :type 'function)
 
-(defcustom org-popup-posframe-org-todo-poshandler org-popup-posframe-poshandler
-  "The poshandler of org-popup-posframe."
+(defcustom org-popup-posframe-org-insert-structure-template-poshandler #'posframe-poshandler-point-1
+  "The posframe poshandler of org-insert-structure-template."
+  :group 'org-popup-posframe
+  :type 'function)
+
+(defcustom org-popup-posframe-org-todo-poshandler #'posframe-poshandler-point-1
+  "The posframe poshandler of org-todo."
   :group 'org-popup-posframe
   :type 'function)
 
@@ -97,7 +104,7 @@ When 0, no border is showed."
   (when (posframe-workable-p)
     (posframe-show buffer
 		   :position (point)
-		   :poshandler org-popup-posframe-org-mks-poshandler
+		   :poshandler org-popup-posframe--org-mks-poshandler
 		   :font org-popup-posframe-font
 		   :background-color (face-attribute 'org-popup-posframe :background nil t)
 		   :foreground-color (face-attribute 'org-popup-posframe :foreground nil t)
@@ -136,6 +143,15 @@ When 0, no border is showed."
                    (org-popup-posframe--org-mks-show-buffer buffer))))
         (funcall func table title prompt specials))))
 
+(defun org-popup-posframe--org-capture-advice (&rest r)
+  (ignore r)
+  (setq org-popup-posframe--org-mks-poshandler
+        org-popup-posframe-org-capture-poshandler))
+
+(defun org-popup-posframe--org-insert-structure-template-mks-advice (&rest r)
+  (ignore r)
+  (setq org-popup-posframe--org-mks-poshandler
+        org-popup-posframe-org-insert-structure-template-poshandler))
 
 (defun org-popup-posframe--org-todo-advice (func &optional current-todo-keyword)
   ;; If using (with-current-buffer buffer ... ) or (set-buffer buffer)
@@ -143,11 +159,11 @@ When 0, no border is showed."
   ;; inside org-fast-todo-selection, (apply max ...) will error
   (let ((original-buffer (current-buffer))
         (buffer (get-buffer-create " *Org todo*")))
+    (fset 'original-set-window-buffer (symbol-function 'set-window-buffer))
     (unwind-protect
-        (fset 'original-set-window-buffer (symbol-function 'set-window-buffer))
         (cl-letf* (((symbol-function 'delete-other-windows) (lambda () nil))
                    ((symbol-function 'split-window-below) (lambda () nil))
-                   ((symbol-function 'set-window-buffer) (lambda (a b) nil))
+                   ((symbol-function 'set-window-buffer) (lambda (a b) (ignore a b)))
                    ;; set buffer to " *Org todo*"
                    ((symbol-function 'org-switch-to-buffer-other-window) #'set-buffer)
                    ((symbol-function 'org-fit-window-to-buffer)
@@ -173,10 +189,19 @@ When 0, no border is showed."
       (progn
         (advice-add 'org-mks :around
                     #'org-popup-posframe--org-mks-advice)
+        (advice-add 'org-capture :before
+                    #'org-popup-posframe--org-capture-advice)
+        (advice-add 'org--insert-structure-template-mks :before
+                    #'org-popup-posframe--org-insert-structure-template-mks-advice)
         (advice-add 'org-fast-todo-selection :around
                     #'org-popup-posframe--org-todo-advice))
+
     (advice-remove 'org-mks
                    #'org-popup-posframe--org-mks-advice)
+    (advice-remove 'org-capture
+                   #'org-popup-posframe--org-capture-advice)
+    (advice-remove 'org-insert-structure-template
+                   #'org-popup-posframe--org-insert-structure-template-advice)
     (advice-remove 'org-fast-todo-selection
                    #'org-popup-posframe--org-todo-advice)))
 
