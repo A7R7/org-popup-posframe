@@ -55,6 +55,11 @@
   :group 'org-popup-posframe
   :type 'function)
 
+(defcustom org-popup-posframe-org-insert-link-poshandler #'posframe-poshandler-window-bottom-right-corner
+  "The posframe poshandler of org-insert-structure-template."
+  :group 'org-popup-posframe
+  :type 'function)
+
 (defcustom org-popup-posframe-org-insert-structure-template-poshandler #'posframe-poshandler-point-1
   "The posframe poshandler of org-insert-structure-template."
   :group 'org-popup-posframe
@@ -130,6 +135,22 @@ When 0, no border is showed."
 		   :override-parameters org-popup-posframe-parameters)))
 
 
+(defun org-popup-posframe--org-insert-link-show-buffer (buffer)
+  (when (posframe-workable-p)
+    (posframe-show buffer
+		   :position (point)
+		   :poshandler org-popup-posframe-org-insert-link-poshandler
+		   :font org-popup-posframe-font
+		   :background-color (face-attribute 'org-popup-posframe :background nil t)
+		   :foreground-color (face-attribute 'org-popup-posframe :foreground nil t)
+		   ;; :min-width org-popup-posframe-min-width
+		   ;; :min-height org-popup-posframe-min-height
+		   :internal-border-width org-popup-posframe-border-width
+		   :internal-border-color (face-attribute 'org-popup-posframe-border :background nil t)
+		   :override-parameters org-popup-posframe-parameters)))
+
+
+
 (defun org-popup-posframe--org-mks-advice (func table title &optional prompt specials)
   (let ((original-buffer (current-buffer))
         (buffer (get-buffer-create "*Org Select*")))
@@ -153,7 +174,7 @@ When 0, no border is showed."
   (setq org-popup-posframe--org-mks-poshandler
         org-popup-posframe-org-insert-structure-template-poshandler))
 
-(defun org-popup-posframe--org-todo-advice (func &optional current-todo-keyword)
+(defun org-popup-posframe--org-fast-todo-selection-advice (func &optional current-todo-keyword)
   ;; If using (with-current-buffer buffer ... ) or (set-buffer buffer)
   ;; before calling org-fast-todo-selection
   ;; inside org-fast-todo-selection, (apply max ...) will error
@@ -178,6 +199,19 @@ When 0, no border is showed."
           (funcall func current-todo-keyword))
       (when buffer (kill-buffer buffer)))))
 
+(defun org-popup-posframe--org-insert-link-advice
+    (func &optional COMPLETE-FILE LINK-LOCATION DESCRIPTION)
+  (let ((original-buffer (current-buffer))
+        (buffer (get-buffer-create "*Org Links*")))
+    (cl-letf (;; set buffer to "*Org Select*"
+              ((symbol-function 'org-switch-to-buffer-other-window)
+               (lambda (a) (ignore a)))
+              ((symbol-function 'org-format-prompt)
+               (lambda (PROMPT DEFAULT &rest FORMAT-ARGS)
+                 (org-popup-posframe--org-insert-link-show-buffer buffer)
+                 (format-prompt PROMPT DEFAULT FORMAT-ARGS))))
+      (funcall func COMPLETE-FILE LINK-LOCATION DESCRIPTION))))
+
 
 ;;;###autoload
 (define-minor-mode org-popup-posframe-mode
@@ -194,16 +228,19 @@ When 0, no border is showed."
         (advice-add 'org--insert-structure-template-mks :before
                     #'org-popup-posframe--org-insert-structure-template-mks-advice)
         (advice-add 'org-fast-todo-selection :around
-                    #'org-popup-posframe--org-todo-advice))
-
+                    #'org-popup-posframe--org-fast-todo-selection-advice)
+        (advice-add 'org-insert-link :around
+                    #'org-popup-posframe--org-insert-link-advice))
     (advice-remove 'org-mks
                    #'org-popup-posframe--org-mks-advice)
     (advice-remove 'org-capture
                    #'org-popup-posframe--org-capture-advice)
     (advice-remove 'org-insert-structure-template
-                   #'org-popup-posframe--org-insert-structure-template-advice)
+                   #'org-popup-posframe--org-insert-structure-template-mks-advice)
     (advice-remove 'org-fast-todo-selection
-                   #'org-popup-posframe--org-todo-advice)))
+                   #'org-popup-posframe--org-fast-todo-selection-advice)
+    (advice-remove 'org-insert-link
+                   #'org-popup-posframe--org-insert-link-advice)))
 
 (provide 'org-popup-posframe)
 
