@@ -48,6 +48,11 @@
   :group 'org-popup-posframe
   :type 'function)
 
+(defcustom org-popup-posframe-org-export-dispatch-poshandler #'posframe-poshandler-window-bottom-right-corner
+  "The posframe poshandler of org-export-dispatch."
+  :group 'org-popup-posframe
+  :type 'function)
+
 (defvar org-popup-posframe--org-mks-poshandler nil)
 
 (defcustom org-popup-posframe-org-capture-poshandler #'posframe-poshandler-window-bottom-right-corner
@@ -139,6 +144,18 @@ When 0, no border is showed."
      (kill-buffer buffer))))
 
 
+(defun org-popup-posframe--org-export--dispatch-ui-advice (func options first-key expertp)
+  (let ((original-buffer (current-buffer))
+        (buffer (get-buffer-create "*Org Export Dispatcher*")))
+    (cl-letf (((symbol-function 'org-fit-window-to-buffer)
+               (lambda ()
+                 ;; posframe show
+                 (org-popup-posframe--show-buffer
+                  buffer
+                  org-popup-posframe-org-export-dispatch-poshandler))))
+      (funcall func options first-key expertp))))
+
+
 (defun org-popup-posframe--org-mks-advice (func table title &optional prompt specials)
   (let ((original-buffer (current-buffer))
         (buffer (get-buffer-create "*Org Select*")))
@@ -225,6 +242,8 @@ When 0, no border is showed."
                     #'org-popup-posframe--org-mks-advice)
         (advice-add 'org-capture :before
                     #'org-popup-posframe--org-capture-advice)
+        (advice-add 'org-export--dispatch-ui :around
+                    #'org-popup-posframe--org-export--dispatch-ui-advice)
         (advice-add 'org--insert-structure-template-mks :before
                     #'org-popup-posframe--org-insert-structure-template-mks-advice)
         (advice-add 'org-fast-todo-selection :around
@@ -237,6 +256,8 @@ When 0, no border is showed."
                    #'org-popup-posframe--org-mks-advice)
     (advice-remove 'org-capture
                    #'org-popup-posframe--org-capture-advice)
+    (advice-remove 'org-export--dispatch-ui
+                   org-popup-posframe--org-export--dispatch-ui-advice)
     (advice-remove 'org-insert-structure-template
                    #'org-popup-posframe--org-insert-structure-template-mks-advice)
     (advice-remove 'org-fast-todo-selection
