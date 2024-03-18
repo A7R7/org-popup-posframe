@@ -43,6 +43,11 @@
   :group 'org-popup-posframe
   :type 'string)
 
+(defcustom org-popup-posframe-org-attach-poshandler #'posframe-poshandler-window-bottom-right-corner
+  "The posframe poshandler of org-attach."
+  :group 'org-popup-posframe
+  :type 'function)
+
 (defvar org-popup-posframe--org-mks-poshandler nil)
 
 (defcustom org-popup-posframe-org-capture-poshandler #'posframe-poshandler-window-bottom-right-corner
@@ -113,6 +118,25 @@ When 0, no border is showed."
 		   :internal-border-width org-popup-posframe-border-width
 		   :internal-border-color (face-attribute 'org-popup-posframe-border :background nil t)
 		   :override-parameters org-popup-posframe-parameters)))
+
+
+(defun org-popup-posframe--org-attach-advice (func)
+  (let ((original-buffer (current-buffer))
+        (buffer (get-buffer-create "*Org Attach*")))
+    (unwind-protect
+     (cl-letf (;; set buffer to "*Org Attach*"
+               ((symbol-function 'org-switch-to-buffer-other-window) #'set-buffer)
+               ((symbol-function 'org-fit-window-to-buffer)
+                (lambda (a)
+                  (ignore a)
+                  ;; set buffer back
+                  (set-buffer original-buffer)
+                  ;; posframe show
+                  (org-popup-posframe--show-buffer
+                   buffer
+                   org-popup-posframe-org-attach-poshandler))))
+       (funcall func))
+     (kill-buffer buffer))))
 
 
 (defun org-popup-posframe--org-mks-advice (func table title &optional prompt specials)
@@ -195,6 +219,8 @@ When 0, no border is showed."
   :lighter nil
   (if org-popup-posframe-mode
       (progn
+        (advice-add 'org-attach :around
+                    #'org-popup-posframe--org-attach-advice)
         (advice-add 'org-mks :around
                     #'org-popup-posframe--org-mks-advice)
         (advice-add 'org-capture :before
@@ -205,6 +231,8 @@ When 0, no border is showed."
                     #'org-popup-posframe--org-fast-todo-selection-advice)
         (advice-add 'org-insert-link :around
                     #'org-popup-posframe--org-insert-link-advice))
+    (advice-remove 'org-attach
+                    #'org-popup-posframe--org-attach-advice)
     (advice-remove 'org-mks
                    #'org-popup-posframe--org-mks-advice)
     (advice-remove 'org-capture
