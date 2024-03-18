@@ -1,0 +1,95 @@
+#+title: org-popup-posframe
+
+  [[https://www.gnu.org/licenses/gpl-3.0][https://img.shields.io/badge/License-GPLv3-blue.svg]]
+
+
+* About
+This plugin makes org mode popup buffers display in posframe.
+
+By default, org mode has some functionalities that will divide out a new window, in which it displays a buffer that let you type or select something.
+This could be a little annoying if the window is large but the buffer a
+
+Here is a screenshort to give you an idea:
+
+
+Supported commands that generates popup buffers:
+- ~org-attach~
+- ~org-capture~
+- ~org-export-dispatch~
+- ~org-insert-link~
+- ~org-insert-structure-template~
+- ~org-todo~
+
+* Installation
+** Prerequisities
+- [[https://github.com/tumashu/posframe][posframe]]
+** Enable
+#+begin_src emacs-lisp
+(require 'org-popup-posframe)
+(org-popup-posframe-mode 1)
+#+end_src
+
+* Tips
+** Don't display some of the buffers in posframe
+If ~org-popup-posframe-mode~ is enabled, for  ~org-attach~ ,  ~org-capture~ , ~org-export-dispatch~ , ~org-insert-link~ , ~org-insert-structure-template~ , ~org-todo~, there popup buffers will be displayed in posframe.
+
+To disable some of them (so they behave the default way), set ~org-popup-posframe-<command-name>~ to nil, *before* enabling ~org-popup-posframe-mode~.
+
+e.g: disable all of them
+#+begin_src emacs-lisp
+(setq org-popup-posframe-org-attach nil)
+(setq org-popup-posframe-org-capture nil)
+(setq org-popup-posframe-org-export-dispatch nil)
+(setq org-popup-posframe-org-insert-link nil)
+(setq org-popup-posframe-org-insert-structure-template nil)
+(setq org-popup-posframe-org-todo nil)
+(org-popup-posframe-mode 1)
+#+end_src
+
+** Change the posframe's positions
+Each supported command have a ~posframe-poshandlers~ that can be assigned, which decides the position the posframes display.
+By default, they're fine-tuned +to my likings+, therefore you normally don't need to do anything here.
+
+If you are not satisfied, reassign some of these poshandler:
+- ~org-popup-posframe-org-attach-poshandler~
+- ~org-popup-posframe-org-capture-poshandler~
+- ~org-popup-posframe-org-export-dispatch-poshandler~
+- ~org-popup-posframe-org-insert-link-poshandler~
+- ~org-popup-posframe-org-insert-structure-template-poshandler~
+- ~org-popup-posframe-org-todo-poshandler~
+
+to available poshandlers that come by default with the ~posframe~ package:
+- ~posframe-poshandler-frame-center~
+- ~posframe-poshandler-frame-top-center~
+- ~posframe-poshandler-frame-top-left-corner~
+- ~posframe-poshandler-frame-top-right-corner~
+- ~posframe-poshandler-frame-top-left-or-right-other-corner~
+- ~posframe-poshandler-frame-bottom-center~
+- ~posframe-poshandler-frame-bottom-left-corner~
+- ~posframe-poshandler-frame-bottom-right-corner~
+- ~posframe-poshandler-window-center~
+- ~posframe-poshandler-window-top-center~
+- ~posframe-poshandler-window-top-left-corner~
+- ~posframe-poshandler-window-top-right-corner~
+- ~posframe-poshandler-window-bottom-center~
+- ~posframe-poshandler-window-bottom-left-corner~
+- ~posframe-poshandler-window-bottom-right-corner~
+- ~posframe-poshandler-point-top-left-corner~
+- ~posframe-poshandler-point-bottom-left-corner~
+- ~posframe-poshandler-point-bottom-left-corner-upward~
+- ~posframe-poshandler-point-window-center~
+- ~posframe-poshandler-point-frame-center~
+
+  Or you can write your own poshandler.
+
+** Change border width
+#+begin_src emacs-lisp
+(setq org-popup-posframe-border-width 3)
+#+end_src
+
+** Show fringe in posframe
+#+begin_src emacs-lisp
+(setq org-popup-posframe-parameters
+        '((left-fringe . 20)
+          (right-fringe . 20)))
+#+end_src
