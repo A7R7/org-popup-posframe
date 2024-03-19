@@ -44,106 +44,87 @@
 
 (defcustom org-popup-posframe-org-attach t
   "Show org-attach buffer in posframe."
-  :group 'org-popup-posframe
   :type 'boolean)
 
 (defcustom org-popup-posframe-org-capture t
   "Show org-capture buffer in posframe."
-  :group 'org-popup-posframe
   :type 'boolean)
 
 (defcustom org-popup-posframe-org-export-dispatch t
   "Show org-export-dispatch buffer in posframe."
-  :group 'org-popup-posframe
   :type 'boolean)
 
 (defcustom org-popup-posframe-org-insert-link t
   "Show org-insert-link buffer in posframe."
-  :group 'org-popup-posframe
   :type 'boolean)
 
 (defcustom org-popup-posframe-org-insert-structure-template t
   "Show org-insert-structure-template buffer in posframe."
-  :group 'org-popup-posframe
   :type 'boolean)
 
 (defcustom org-popup-posframe-org-todo t
   "Show org-todo buffer in posframe."
-  :group 'org-popup-posframe
   :type 'boolean)
 
 
 (defcustom org-popup-posframe-font nil
   "The font used by org-popup-posframe."
-  :group 'org-popup-posframe
   :type 'string)
 
 (defcustom org-popup-posframe-org-attach-poshandler
   #'posframe-poshandler-window-bottom-right-corner
   "The posframe poshandler of org-attach."
-  :group 'org-popup-posframe
   :type 'function)
 
 (defcustom org-popup-posframe-org-export-dispatch-poshandler
   #'posframe-poshandler-window-bottom-right-corner
   "The posframe poshandler of org-export-dispatch."
-  :group 'org-popup-posframe
   :type 'function)
 
 (defcustom org-popup-posframe-org-capture-poshandler
   #'posframe-poshandler-window-bottom-right-corner
   "The posframe poshandler of org-insert."
-  :group 'org-popup-posframe
   :type 'function)
 
 (defcustom org-popup-posframe-org-insert-link-poshandler
   #'posframe-poshandler-window-bottom-right-corner
   "The posframe poshandler of org-insert-structure-template."
-  :group 'org-popup-posframe
   :type 'function)
 
 (defcustom org-popup-posframe-org-insert-structure-template-poshandler
   #'posframe-poshandler-point-1
   "The posframe poshandler of org-insert-structure-template."
-  :group 'org-popup-posframe
   :type 'function)
 
 (defcustom org-popup-posframe-org-todo-poshandler
   #'posframe-poshandler-point-1
   "The posframe poshandler of org-todo."
-  :group 'org-popup-posframe
   :type 'function)
 
 (defcustom org-popup-posframe-min-width 0
   "The width of org-popup-min-posframe."
-  :group 'org-popup-posframe
   :type 'number)
 
 (defcustom org-popup-posframe-min-height 0
   "The height of org-popup-min-posframe."
-  :group 'org-popup-posframe
   :type 'number)
 
 (defcustom org-popup-posframe-border-width 1
   "The border width used by org-popup-posframe.
 When 0, no border is showed."
-  :group 'org-popup-posframe
   :type 'number)
 
 (defcustom org-popup-posframe-parameters nil
   "The frame parameters used by org-popup-posframe."
-  :group 'org-popup-posframe
   :type 'string)
 
 (defface org-popup-posframe
   '((t (:inherit default)))
-  "Face used by the org-popup-posframe."
-  :group 'org-popup-posframe)
+  "Face used by the org-popup-posframe.")
 
 (defface org-popup-posframe-border
   '((t (:inherit default :background "gray50")))
-  "Face used by the org-popup-posframe's border."
-  :group 'org-popup-posframe)
+  "Face used by the org-popup-posframe's border.")
 
 
 
