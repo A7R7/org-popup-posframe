@@ -150,7 +150,7 @@ When 0, no border is showed."
         (buffer (get-buffer-create "*Org Attach*")))
     (unwind-protect
         (cl-letf (;; set buffer to "*Org Attach*"
-                  ((symbol-function 'org-switch-to-buffer-other-window) #'set-buffer)
+                  ((symbol-function 'switch-to-buffer-other-window) #'set-buffer)
                   ((symbol-function 'org-fit-window-to-buffer)
                    (lambda (a)
                      (ignore a)
@@ -180,7 +180,7 @@ When 0, no border is showed."
   (let ((original-buffer (current-buffer))
         (buffer (get-buffer-create "*Org Select*")))
     (cl-letf (;; set buffer to "*Org Select*"
-              ((symbol-function 'org-switch-to-buffer-other-window) #'set-buffer)
+              ((symbol-function 'switch-to-buffer-other-window) #'set-buffer)
               ((symbol-function 'org-fit-window-to-buffer)
                (lambda ()
                  ;; set buffer back
@@ -221,10 +221,10 @@ When 0, no border is showed."
     (fset 'original-set-window-buffer (symbol-function 'set-window-buffer))
     (unwind-protect
         (cl-letf* (((symbol-function 'delete-other-windows) (lambda () nil))
-                   ((symbol-function 'split-window-below) (lambda () nil))
+                   ((symbol-function 'split-window-vertically) (lambda () nil))
                    ((symbol-function 'set-window-buffer) (lambda (a b) (ignore a b)))
                    ;; set buffer to " *Org todo*"
-                   ((symbol-function 'org-switch-to-buffer-other-window) #'set-buffer)
+                   ((symbol-function 'switch-to-buffer-other-window) #'set-buffer)
                    ((symbol-function 'org-fit-window-to-buffer)
                     (lambda ()
                       ;; set buffer back
@@ -243,8 +243,7 @@ When 0, no border is showed."
 (defun org-popup-posframe--org-insert-link-advice
     (func &optional COMPLETE-FILE LINK-LOCATION DESCRIPTION)
   (let ((buffer (get-buffer-create "*Org Links*")))
-    (cl-letf (;; set buffer to "*Org Select*"
-              ((symbol-function 'org-switch-to-buffer-other-window)
+    (cl-letf (((symbol-function 'switch-to-buffer-other-window)
                (lambda (a) (ignore a)))
               ((symbol-function 'org-format-prompt)
                (lambda (PROMPT DEFAULT &rest FORMAT-ARGS)
