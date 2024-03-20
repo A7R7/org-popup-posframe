@@ -62,6 +62,10 @@
   "Show org-insert-structure-template buffer in posframe."
   :type 'boolean)
 
+(defcustom org-popup-posframe-org-set-tags-command t
+  "Show org-set-tags-command buffer in posframe."
+  :type 'boolean)
+
 (defcustom org-popup-posframe-org-todo t
   "Show org-todo buffer in posframe."
   :type 'boolean)
@@ -99,6 +103,11 @@
 (defcustom org-popup-posframe-org-todo-poshandler
   #'posframe-poshandler-point-1
   "The posframe poshandler of org-todo."
+  :type 'function)
+
+(defcustom org-popup-posframe-org-set-tags-command-poshandler
+  #'posframe-poshandler-point-1
+  "The posframe poshandler of org-set-tags-command."
   :type 'function)
 
 (defcustom org-popup-posframe-min-width 0
@@ -213,6 +222,36 @@ When 0, no border is showed."
     (advice-remove 'org-mks
                    #'org-popup-posframe--org-mks-advice)))
 
+(defun org-popup-posframe--org-fast-tag-selection-advice
+    (func current-tags inherited-tags tag-table &optional todo-table)
+  ;; TODO: simplier implementation
+  (let ((original-buffer (current-buffer))
+        (buffer (get-buffer-create " *Org tags*")))
+    (fset 'original-set-window-buffer (symbol-function 'set-window-buffer))
+    (unwind-protect
+        (cl-letf* (((symbol-function 'delete-other-windows) (lambda () nil))
+                   ((symbol-function 'split-window-vertically) (lambda () nil))
+                   ((symbol-function 'set-window-buffer) (lambda (a b) (ignore a b)))
+                   ;; set buffer to " *Org tags*"
+                   ((symbol-function 'switch-to-buffer-other-window) #'set-buffer)
+                   ((symbol-function 'org-fit-window-to-buffer)
+                    (lambda ()
+                      ;; set buffer back
+                      (set-buffer original-buffer)
+                      (cl-letf (((symbol-function 'set-window-buffer)
+                                 ;; avoid set-window-buffer redefinition
+                                 #'original-set-window-buffer))
+                        ;; posframe show
+                        (org-popup-posframe--show-buffer
+                         buffer
+                         org-popup-posframe-org-todo-poshandler))
+                      ;; set buffer back to " *Org tags*"
+                      ;; so org-fast-tag-insert can work
+                      (set-buffer buffer))))
+          (funcall-interactively func
+                                 current-tags inherited-tags tag-table todo-table))
+      (when buffer (kill-buffer buffer)))))
+
 
 (defun org-popup-posframe--org-fast-todo-selection-advice (func &optional current-todo-keyword)
   ;; TODO: simplier implementation
@@ -274,6 +313,9 @@ When 0, no border is showed."
         (if org-popup-posframe-org-insert-structure-template
             (advice-add 'org--insert-structure-template-mks :around
                         #'org-popup-posframe--org-insert-structure-template-mks-advice))
+        (if org-popup-posframe-org-set-tags-command
+            (advice-add 'org-fast-tag-selection :around
+                        #'org-popup-posframe--org-fast-tag-selection-advice))
         (if org-popup-posframe-org-todo
             (advice-add 'org-fast-todo-selection :around
                         #'org-popup-posframe--org-fast-todo-selection-advice))

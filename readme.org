@@ -23,6 +23,7 @@ Supported commands that generates popup buffers:
 - ~org-export-dispatch~
 - ~org-insert-link~
 - ~org-insert-structure-template~
+- ~org-set-tags-command~
 - ~org-todo~
 
 * Installation
@@ -36,7 +37,7 @@ Supported commands that generates popup buffers:
 
 * Tips
 ** Don't display some of the buffers in posframe
-If ~org-popup-posframe-mode~ is enabled, for  ~org-attach~ ,  ~org-capture~ , ~org-export-dispatch~ , ~org-insert-link~ , ~org-insert-structure-template~ , ~org-todo~, there popup buffers will be displayed in posframe.
+If ~org-popup-posframe-mode~ is enabled, for  ~org-attach~ ,  ~org-capture~ , ~org-export-dispatch~ , ~org-insert-link~ , ~org-insert-structure-template~ , ~org-set-tags-command~, ~org-todo~, there popup buffers will be displayed in posframe.
 
 To disable some of them (so they behave the default way), set ~org-popup-posframe-<command-name>~ to nil, *before* enabling ~org-popup-posframe-mode~.
 
@@ -47,6 +48,7 @@ e.g: disable all of them
 (setq org-popup-posframe-org-export-dispatch nil)
 (setq org-popup-posframe-org-insert-link nil)
 (setq org-popup-posframe-org-insert-structure-template nil)
+(setq org-popup-posframe-org-set-tags-command nil)
 (setq org-popup-posframe-org-todo nil)
 (org-popup-posframe-mode 1)
 #+end_src
