@@ -4,7 +4,7 @@
 
 
 * About
-This plugin makes org mode popup buffers display in posframe.
+This package makes org mode popup buffers display in posframe.
 
 By default, org mode has some functionalities that will divide out a new window, in which it displays a buffer that let you type or select something. This could be a little annoying if the window is large but the buffer is small.
 Or you may simply find posframe more pretty than divided windows.
