@@ -229,9 +229,9 @@ When 0, no border is showed."
         (buffer (get-buffer-create " *Org tags*")))
     (fset 'original-set-window-buffer (symbol-function 'set-window-buffer))
     (unwind-protect
-        (cl-letf* (((symbol-function 'delete-other-windows) (lambda () nil))
-                   ((symbol-function 'split-window-vertically) (lambda () nil))
-                   ((symbol-function 'set-window-buffer) (lambda (a b) (ignore a b)))
+        (cl-letf* (((symbol-function 'delete-other-windows) #'ignore)
+                   ((symbol-function 'split-window-vertically) #'ignore)
+                   ((symbol-function 'set-window-buffer) #'ignore)
                    ;; set buffer to " *Org tags*"
                    ((symbol-function 'switch-to-buffer-other-window) #'set-buffer)
                    ((symbol-function 'org-fit-window-to-buffer)
@@ -259,9 +259,9 @@ When 0, no border is showed."
         (buffer (get-buffer-create " *Org todo*")))
     (fset 'original-set-window-buffer (symbol-function 'set-window-buffer))
     (unwind-protect
-        (cl-letf* (((symbol-function 'delete-other-windows) (lambda () nil))
-                   ((symbol-function 'split-window-vertically) (lambda () nil))
-                   ((symbol-function 'set-window-buffer) (lambda (a b) (ignore a b)))
+        (cl-letf* (((symbol-function 'delete-other-windows) #'ignore)
+                   ((symbol-function 'split-window-vertically) #'ignore)
+                   ((symbol-function 'set-window-buffer) #'ignore)
                    ;; set buffer to " *Org todo*"
                    ((symbol-function 'switch-to-buffer-other-window) #'set-buffer)
                    ((symbol-function 'org-fit-window-to-buffer)
@@ -282,8 +282,7 @@ When 0, no border is showed."
 (defun org-popup-posframe--org-insert-link-advice
     (func &optional COMPLETE-FILE LINK-LOCATION DESCRIPTION)
   (let ((buffer (get-buffer-create "*Org Links*")))
-    (cl-letf (((symbol-function 'switch-to-buffer-other-window)
-               (lambda (a) (ignore a)))
+    (cl-letf (((symbol-function 'switch-to-buffer-other-window) #'ignore)
               ((symbol-function 'org-format-prompt)
                (lambda (PROMPT DEFAULT &rest FORMAT-ARGS)
                  (org-popup-posframe--show-buffer
