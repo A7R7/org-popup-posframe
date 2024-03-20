@@ -1,16 +1,13 @@
 ;;; org-popup-posframe.el --- Show org mode popup buffers in posframe -*- lexical-binding: t; -*-
 
-;;; Commentary:
+;; Copyright ???
 
-;; Display org mode popup buffers in posframe
-;; Supported popup buffers:
-;; - org-attach
-;; - org-capture
-;; - org-export-dispatch
-;; - org-insert-link
-;; - org-insert-structure-template
-;; - org-todo
-
+;; Author: a7r7 <Aaron__Lee_@outlook.com>
+;; SPDX-License-Identifier: GPL-3.0-or-later
+;; Homepage: https://github.com/A7R7/org-popup-posframe
+;; Keywords: convenience, outlines, org
+;; Version: 0.0.1
+;; Package-Requires: ((emacs "28.1"))
 
 ;;; License:
 
@@ -27,6 +24,16 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+;;; Commentary:
+
+;; Display org mode popup buffers in posframe
+;; Supported popup buffers:
+;; - org-attach
+;; - org-capture
+;; - org-export-dispatch
+;; - org-insert-link
+;; - org-insert-structure-template
+;; - org-todo
 
 ;;; Code:
 
