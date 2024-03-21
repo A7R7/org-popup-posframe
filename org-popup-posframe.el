@@ -1,8 +1,8 @@
 ;;; org-popup-posframe.el --- Show org mode popup buffers in posframe -*- lexical-binding: t; -*-
 
-;; Copyright ???
+;; Copyright (C) Aaron Lee
 
-;; Author: a7r7 <Aaron__Lee_@outlook.com>
+;; Author: Aaron Lee <Aaron__Lee_@outlook.com>
 ;; SPDX-License-Identifier: GPL-3.0-or-later
 ;; Homepage: https://github.com/A7R7/org-popup-posframe
 ;; Keywords: convenience, outlines, org
