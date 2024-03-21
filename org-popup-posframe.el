@@ -1,16 +1,13 @@
 ;;; org-popup-posframe.el --- Show org mode popup buffers in posframe -*- lexical-binding: t; -*-
 
-;;; Commentary:
+;; Copyright ???
 
-;; Display org mode popup buffers in posframe
-;; Supported popup buffers:
-;; - org-attach
-;; - org-capture
-;; - org-export-dispatch
-;; - org-insert-link
-;; - org-insert-structure-template
-;; - org-todo
-
+;; Author: a7r7 <Aaron__Lee_@outlook.com>
+;; SPDX-License-Identifier: GPL-3.0-or-later
+;; Homepage: https://github.com/A7R7/org-popup-posframe
+;; Keywords: convenience, outlines, org
+;; Version: 0.0.1
+;; Package-Requires: ((emacs "28.1"))
 
 ;;; License:
 
@@ -27,6 +24,16 @@
 ;; You should have received a copy of the GNU General Public License
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+;;; Commentary:
+
+;; Display org mode popup buffers in posframe
+;; Supported popup buffers:
+;; - org-attach
+;; - org-capture
+;; - org-export-dispatch
+;; - org-insert-link
+;; - org-insert-structure-template
+;; - org-todo
 
 ;;; Code:
 
@@ -43,31 +50,31 @@
   :prefix "org-popup-posframe")
 
 (defcustom org-popup-posframe-org-attach t
-  "Show org-attach buffer in posframe."
+  "Show `org-attach' buffer in posframe."
   :type 'boolean)
 
 (defcustom org-popup-posframe-org-capture t
-  "Show org-capture buffer in posframe."
+  "Show `org-capture' buffer in posframe."
   :type 'boolean)
 
 (defcustom org-popup-posframe-org-export-dispatch t
-  "Show org-export-dispatch buffer in posframe."
+  "Show `org-export-dispatch' buffer in posframe."
   :type 'boolean)
 
 (defcustom org-popup-posframe-org-insert-link t
-  "Show org-insert-link buffer in posframe."
+  "Show `org-insert-link' buffer in posframe."
   :type 'boolean)
 
 (defcustom org-popup-posframe-org-insert-structure-template t
-  "Show org-insert-structure-template buffer in posframe."
+  "Show `org-insert-structure-template' buffer in posframe."
   :type 'boolean)
 
 (defcustom org-popup-posframe-org-set-tags-command t
-  "Show org-set-tags-command buffer in posframe."
+  "Show `org-set-tags-command' buffer in posframe."
   :type 'boolean)
 
 (defcustom org-popup-posframe-org-todo t
-  "Show org-todo buffer in posframe."
+  "Show `org-todo' buffer in posframe."
   :type 'boolean)
 
 
@@ -77,12 +84,12 @@
 
 (defcustom org-popup-posframe-org-attach-poshandler
   #'posframe-poshandler-window-bottom-right-corner
-  "The posframe poshandler of org-attach."
+  "The posframe poshandler of `org-attach'."
   :type 'function)
 
 (defcustom org-popup-posframe-org-export-dispatch-poshandler
   #'posframe-poshandler-window-bottom-right-corner
-  "The posframe poshandler of org-export-dispatch."
+  "The posframe poshandler of `org-export-dispatch'."
   :type 'function)
 
 (defcustom org-popup-posframe-org-capture-poshandler
@@ -92,22 +99,22 @@
 
 (defcustom org-popup-posframe-org-insert-link-poshandler
   #'posframe-poshandler-window-bottom-right-corner
-  "The posframe poshandler of org-insert-structure-template."
+  "The posframe poshandler of `org-insert-structure-template'."
   :type 'function)
 
 (defcustom org-popup-posframe-org-insert-structure-template-poshandler
   #'posframe-poshandler-point-1
-  "The posframe poshandler of org-insert-structure-template."
+  "The posframe poshandler of `org-insert-structure-template'."
   :type 'function)
 
 (defcustom org-popup-posframe-org-todo-poshandler
   #'posframe-poshandler-point-1
-  "The posframe poshandler of org-todo."
+  "The posframe poshandler of `org-todo'."
   :type 'function)
 
 (defcustom org-popup-posframe-org-set-tags-command-poshandler
   #'posframe-poshandler-point-1
-  "The posframe poshandler of org-set-tags-command."
+  "The posframe poshandler of `org-set-tags-command'."
   :type 'function)
 
 (defcustom org-popup-posframe-min-width 0
@@ -140,6 +147,7 @@ When 0, no border is showed."
 ;;;; Functions
 
 (defun org-popup-posframe--show-buffer (buffer poshandler)
+  "Show BUFFER in a posframe, use POSHANDLER to handle it."
   (when (posframe-workable-p)
     (posframe-show buffer
 		   :position (point)
@@ -155,6 +163,7 @@ When 0, no border is showed."
 
 
 (defun org-popup-posframe--org-attach-advice (func)
+  "Posframe-enabling advice for `org-attach' (FUNC)."
   (let ((original-buffer (current-buffer))
         (buffer (get-buffer-create "*Org Attach*")))
     (unwind-protect
@@ -294,7 +303,7 @@ When 0, no border is showed."
 
 ;;;###autoload
 (define-minor-mode org-popup-posframe-mode
-  "Show org mode popup buffers in posframe"
+  "Show `org-mode' popup buffers in posframe."
   :group 'org-popup-posframe
   :global t
   :lighter nil
