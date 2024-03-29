@@ -7,7 +7,7 @@
 ;; Homepage: https://github.com/A7R7/org-popup-posframe
 ;; Keywords: convenience, outlines, org
 ;; Version: 0.0.1
-;; Package-Requires: ((emacs "28.1"))
+;; Package-Requires: ((emacs "28.1") (posframe "1.4.2"))
 
 ;;; License:
 
