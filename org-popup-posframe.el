@@ -44,6 +44,31 @@
 
 ;;;; Customs & Faces
 
+(defconst org-popup-posframe-handler-customize-type
+  '(radio
+    (function-item posframe-poshandler-frame-center)
+    (function-item posframe-poshandler-frame-top-center)
+    (function-item posframe-poshandler-frame-top-left-corner)
+    (function-item posframe-poshandler-frame-top-right-corner)
+    (function-item posframe-poshandler-frame-top-left-or-right-other-corner)
+    (function-item posframe-poshandler-frame-bottom-center)
+    (function-item posframe-poshandler-frame-bottom-left-corner)
+    (function-item posframe-poshandler-frame-bottom-right-corner)
+    (function-item posframe-poshandler-window-center)
+    (function-item posframe-poshandler-window-top-center)
+    (function-item posframe-poshandler-window-top-left-corner)
+    (function-item posframe-poshandler-window-top-right-corner)
+    (function-item posframe-poshandler-window-bottom-center)
+    (function-item posframe-poshandler-window-bottom-left-corner)
+    (function-item posframe-poshandler-window-bottom-right-corner)
+    (function-item posframe-poshandler-point-top-left-corner)
+    (function-item posframe-poshandler-point-bottom-left-corner)
+    (function-item posframe-poshandler-point-bottom-left-corner-upward)
+    (function-item posframe-poshandler-point-window-center)
+    (function-item posframe-poshandler-point-frame-center)
+    (function :tag "Custom Handler"))
+  "Customize type for posframe handler variables.")
+
 (defgroup org-popup-posframe nil
   "Show org mode popup buffers in posframe."
   :group 'org-popup-posframe
@@ -85,37 +110,37 @@
 (defcustom org-popup-posframe-org-attach-poshandler
   #'posframe-poshandler-window-bottom-right-corner
   "The posframe poshandler of `org-attach'."
-  :type 'function)
+  :type org-popup-posframe-handler-customize-type)
 
 (defcustom org-popup-posframe-org-export-dispatch-poshandler
   #'posframe-poshandler-window-bottom-right-corner
   "The posframe poshandler of `org-export-dispatch'."
-  :type 'function)
+  :type org-popup-posframe-handler-customize-type)
 
 (defcustom org-popup-posframe-org-capture-poshandler
   #'posframe-poshandler-window-bottom-right-corner
   "The posframe poshandler of org-insert."
-  :type 'function)
+  :type org-popup-posframe-handler-customize-type)
 
 (defcustom org-popup-posframe-org-insert-link-poshandler
   #'posframe-poshandler-window-bottom-right-corner
   "The posframe poshandler of `org-insert-structure-template'."
-  :type 'function)
+  :type org-popup-posframe-handler-customize-type)
 
 (defcustom org-popup-posframe-org-insert-structure-template-poshandler
   #'posframe-poshandler-point-1
   "The posframe poshandler of `org-insert-structure-template'."
-  :type 'function)
+  :type org-popup-posframe-handler-customize-type)
 
 (defcustom org-popup-posframe-org-todo-poshandler
   #'posframe-poshandler-point-1
   "The posframe poshandler of `org-todo'."
-  :type 'function)
+  :type org-popup-posframe-handler-customize-type)
 
 (defcustom org-popup-posframe-org-set-tags-command-poshandler
   #'posframe-poshandler-point-1
   "The posframe poshandler of `org-set-tags-command'."
-  :type 'function)
+  :type org-popup-posframe-handler-customize-type)
 
 (defcustom org-popup-posframe-min-width 0
   "The width of org-popup-min-posframe."
