@@ -221,6 +221,7 @@ When 0, no border is showed."
 (defvar org-popup-posframe--org-mks-poshandler nil)
 (defun org-popup-posframe--org-mks-advice (func table title &optional prompt specials)
   (let ((original-buffer (current-buffer))
+        (original-header header-line-format)
         (buffer (get-buffer-create "*Org Select*")))
     (cl-letf (;; set buffer to "*Org Select*"
               ((symbol-function 'switch-to-buffer-other-window) #'set-buffer)
@@ -232,7 +233,9 @@ When 0, no border is showed."
                  (org-popup-posframe--show-buffer
                   buffer
                   org-popup-posframe--org-mks-poshandler))))
-      (funcall-interactively func table title prompt specials))))
+      (unwind-protect
+          (funcall-interactively func table title prompt specials)
+        (setq-local header-line-format original-header)))))
 
 
 (defun org-popup-posframe--org-capture-advice (func &optional goto keys)
